@@ -45,17 +45,59 @@
 #include "mod0keecrack.h"
 
 
-int aes_transformkey(m0_kdbx_header_entry_t *hdr, uint8_t *tkey, size_t tkeylen) {
+int aes_transformkey(m0_kdbx_header_entry_t *hdr, uint8_t *tkey, size_t tkeylen) 
+{
+  uint64_t          rounds         = 0;
 
+  EVP_CIPHER_CTX *ctx = EVP_CIPHER_CTX_new();
+
+  EVP_EncryptInit_ex(
+          ctx,
+          EVP_aes_128_ecb(),
+          NULL,
+          key,
+          NULL);
+
+  EVP_EncryptUpdate(
+          ctx,
+          NULL,
+          0,
+          tkey,
+          tkeylen);
+
+
+  for(rounds = 0; rounds < hdr[TRANSFORMROUNDS].qw; rounds++) {
+  }
+
+cleanup:
+  if (ctx) {
+      EVP_CIPHER_CTX_free(ctx);
+  }
 }
 
-int aes_decrypt_check(m0_kdbx_header_entry_t *hdr, uint8_t *masterkey, m0_kdbx_payload_t *p) {
+bool aes_decrypt_check(m0_kdbx_header_entry_t *hdr, uint8_t *masterkey, m0_kdbx_payload_t *p) {
 
 }
 
 int sha256_hash(uint8_t *hash, uint8_t *data, size_t len) {
     EVP_MD_CTX *ctx = EVP_MD_CTX_new();
-    EVP_DigestInit(ctx, EVP_sha256());
-    EVP_DigestUpdate(ctx, data, len);
-    EVP_DigestFinal(ctx, hash, NULL);
+
+    EVP_DigestInit(
+            ctx, 
+            EVP_sha256()
+            );
+
+    EVP_DigestUpdate(
+            ctx, 
+            data, 
+            len
+            );
+
+    EVP_DigestFinal(
+            ctx, 
+            hash, 
+            NULL
+            );
+
+    return 0;
 }
